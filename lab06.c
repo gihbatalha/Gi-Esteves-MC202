@@ -1,60 +1,113 @@
-//Estrturas
+/*
+  Nome: Matheus Esteves Zanoto   RA: 184256
+  Nome: Giovanna Batalha         RA: 
 
-//Métodos das estruturas
+  Objetivos:
 
-//Métodos relacionados ao S.O.
+  Entradas:
 
-//Métodos que complementam a main
-void preparaParaIniciarProcesso(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+  Saídas:
+*/
 
-void preparaParaFinalizarProcesso(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+#include <stdio.h>
+#include <stdlib.h>
 
-void preparaParaCalcularFragmentacao(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+typedef enum Estado{
+  LIVRE,OCUPADO,PARTICIONADO
+} Estado;
 
-void preparaParaGerarRelatorioDoSistema(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+typedef struct Processo{
+  int codigo;
+  int tamanho;
+} Processo;
 
-void preparaParaImprimirSementes(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+typedef struct Memoria{
+  int valor;
+  Estado estado;
+  int fragmentacao;
+  Processo* processo;
+} Memoria;
 
-void preparaParaImprimirProcessos(){
-	//Ler as variáveis necessárias para essa operação
-	//Chamar os métodos necessários
-}
+typedef struct No{
+  Memoria memoria;
+  No* esq;
+  No* dir;
+} No;
 
+typedef struct Arvore{
+  No* raiz;
+} Arvore;
 
+void inicializarNo(No* no, int valor);
+void inicializarArvore(Arvore* arvore, int valor);
+void percorrerNoParaExcluir(No* no, int cod);
+void excluirNoFolha(Arvore* arvore, int cod);
+
+void iniciarProcesso(Arvore* arvore, Processo processo);
+void finalizarProcesso(Arvore* arvore, int cod);
+int calcularFragmentacao(Arvore* arvore);
+void relatorioSistema(Arvore* arvore);
+void imprimirSementesGeradoras(Arvore* arvore)
+void imprimirProcessos(Arvore* arvore);
 
 int main(){
+  int potencia;
+  scanf("%d",&potencia);
 
-	int op;
+  Arvore arvore;
+  inicializarArvore(&arvore,potencia);
 
-	while(scanf("%d", &op) != EOF){
-		switch(op){
-			case 1:	preparaParaIniciarProcesso();
-					break;
-			case 2:	preparaParaFinalizarProcesso();
-					break;
-			case 3: preparaParaCalcularFragmentacao();
-					break;
-			case 4:	preparaParaGerarRelatorioDoSistema();
-					break;
-			case 5:	preparaParaImprimirSementes();
-					break;
-			case 6:	preparaParaImprimirProcessos();
-					break;
-		}
-	}	
+  int op;
+  while(scanf("%d", &op) != EOF){
+    switch(op){
+	  case 1:{
+
+	  } break;
+	  case 2:{
+
+	  } break;
+	  case 3:{
+
+	  } break;
+	  case 4:{
+
+	  } break;
+	  case 5:{
+
+	  } break;
+	  default:{
+
+	  }
+    }
+  }	
+}
+
+void inicializarNo(No* no, int valor){
+  no->esq = null;
+  no->dir = null;
+  no->memoria.valor = valor;
+  no->memoria.estado = LIVRE;
+  no->memoria.fragmentacao = 0;
+  no->memoria.processo = NULL;
+} 
+
+void inicializarArvore(Arvore* arvore, int valor){
+  arvore->raiz = (No*)malloc(sizeof(No));
+  inicializarNo(&(*arvore->raiz),valor);
+}
+
+void percorrerNoParaExcluir(No* no, int cod){
+  if (no->esq == NULL && no-dir == NULL && no->memoria.processo->codigo == cod)
+    free(no);
+  else{
+    if (no->esq != NULL)
+      percorrerNoParaExcluir(&(*no->esq),cod);
+    if (no->dir != NULL)
+      percorrerNoParaExcluir(&(*no->dir),cod);
+  }
+}
+
+void excluirNoFolha(Arvore* arvore, int cod){
+  No* raiz = arvore->raiz;
+  percorrerNoParaExcluir(&(*arvore->raiz),cod);
 }
