@@ -50,7 +50,7 @@ void relatorioSistema(Arvore* arvore);
 void imprimirSementesGeradoras(Arvore* arvore)
 void imprimirProcessos(Arvore* arvore);
 
-//teste
+//teste eeeee gi
 int main(){
   int potencia;
   scanf("%d",&potencia);
