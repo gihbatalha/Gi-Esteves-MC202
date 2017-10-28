@@ -1,0 +1,31 @@
+Processo (111) de tamanho 195 inicializado com sucesso
+Processo (222) de tamanho 496 inicializado com sucesso
+Memoria insuficiente
+Quantidade total de memoria desperdicada por fragmentacao: 77
+[RELATORIO DE SISTEMA]
+2 Ocupados
+1 Livres
+2 Particionados
+Memoria utilizada = 75 / 100
+[SEMENTES GERADORAS]
+Sim = (O:195/256[111])(P:512)(L:256)(P:1024)(O:496/512[222])
+Pre = (P:1024)(P:512)(O:195/256[111])(L:256)(O:496/512[222])
+Pos = (O:195/256[111])(L:256)(P:512)(O:496/512[222])(P:1024)
+[PROCESSOS PRESENTES NA MEMORIA]
+256 [Processo: 111]
+512 [Processo: 222]
+Processo (111) finalizado com sucesso
+Nao existe processo de codigo 333 inicializado no sistema
+Processo (222) finalizado com sucesso
+Quantidade total de memoria desperdicada por fragmentacao: 0
+[RELATORIO DE SISTEMA]
+0 Ocupados
+1 Livres
+0 Particionados
+Memoria utilizada = 0 / 100
+[SEMENTES GERADORAS]
+Sim = (L:1024)
+Pre = (L:1024)
+Pos = (L:1024)
+[PROCESSOS PRESENTES NA MEMORIA]
+Nenhum processo presente

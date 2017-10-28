@@ -44,14 +44,14 @@ void inicializarArvore(Arvore* arvore, int valor);
 void percorrerNoParaExcluir(No* no, int cod);
 void excluirNoFolha(Arvore* arvore, int cod);
 
-int iniciarProcesso(No* no, Processo processo);
+int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
 void finalizarProcesso(Arvore* arvore, int cod);
-int calcularFragmentacao(Arvore* arvore);
+int calcularFragmentacao(No* no);  ///começado
 void relatorioSistema(Arvore* arvore);
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
-int pot(int base, int expoente);
-void imprimeArvore(No* no, char* espaco);
+int pot(int base, int expoente); //funcionando
+void imprimeArvore(No* no, char* espaco); //feito mas printa meio bizarro
 
 
 
@@ -76,17 +76,21 @@ int main(){
 	  	processo.codigo = cod;
 	  	processo.tamanho = size;
 
-	  	iniciarProcesso(arvore.raiz, processo);
-	  	
-	  	//Testando potencia
-		int pote = pot(2, 10);
-		printf("pot 2^10: %d\n",pote);
+	  	int resp = iniciarProcesso(arvore.raiz, processo);
+
+	  	if(resp == 1){
+	  		printf("Processo (%d) de tamanho %d inicializado com sucesso\n", cod, size);
+	  	}else{
+	  		printf("Memoria insuficiente\n");
+	  	}
 
 	  } break;
 	  case 2:{
 
 	  } break;
 	  case 3:{
+	  		int fragmentacao = calcularFragmentacao(arvore.raiz);
+	  		printf("Quantidade total de memoria desperdicada por fragmentacao: %d\n",fragmentacao);
 
 	  } break;
 	  case 4:{
@@ -170,8 +174,8 @@ int iniciarProcesso(No* no, Processo processo){
 	int valorAtual = pot(2, no->memoria.valor);
 
 	if(processo.tamanho > metadeAtual && processo.tamanho <= valorAtual){
-		//Chegou no nó que cabe o processo, mas está ocupado
-		if(no->memoria.estado == OCUPADO){
+		//Chegou no nó que cabe o processo, mas está ocupado ou particionado, ou seja, não podemos incluir
+		if(no->memoria.estado == OCUPADO || no->memoria.estado == PARTICIONADO){
 			return 0;
 		}
 
@@ -209,6 +213,18 @@ int iniciarProcesso(No* no, Processo processo){
 	}
 
 	return 1;
+}
+
+int calcularFragmentacao(No* raiz){
+	if(raiz == NULL){
+		return 0;
+	}
+
+	int result = raiz->memoria.fragmentacao;
+	int fragDir = calcularFragmentacao(raiz->dir);
+	int fragEsq = calcularFragmentacao(raiz->esq);
+
+	return result + fragEsq + fragDir;
 }
 
 void inicializarNo(No* no, int valor){
