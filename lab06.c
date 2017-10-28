@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 typedef enum Estado{
   LIVRE,OCUPADO,PARTICIONADO
@@ -46,8 +47,9 @@ void excluirNoFolha(Arvore* arvore, int cod);
 
 int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
 void finalizarProcesso(Arvore* arvore, int cod);
-int calcularFragmentacao(No* no);  ///começado
-void relatorioSistema(Arvore* arvore);
+int calcularFragmentacao(No* no);  ///funcionando
+void relatorioSistema(Arvore* arvore); //Gi fazendooo
+int* calculaRelatorioSistema(No* no); //Método auxiliar 
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
 int pot(int base, int expoente); //funcionando
@@ -94,6 +96,7 @@ int main(){
 
 	  } break;
 	  case 4:{
+	  		relatorioSistema(&arvore);
 
 	  } break;
 	  case 5:{
@@ -225,6 +228,68 @@ int calcularFragmentacao(No* raiz){
 	int fragEsq = calcularFragmentacao(raiz->esq);
 
 	return result + fragEsq + fragDir;
+}
+
+int* calculaRelatorioSistema(No* no){
+	int* result = malloc(4*sizeof(int)); //array com os valores numOcupados, numLivres, numParticionados, memoriaOcupada
+
+	//Se é nulo retorna o vetor com zeros
+	if(no == NULL){
+		result[0] = 0;
+		result[1] = 0;
+		result[2] = 0;
+		result[3] = 0;
+		return result;
+	}
+
+	int* resultDir = calculaRelatorioSistema(no->dir);
+	int* resultEsq = calculaRelatorioSistema(no->esq);
+
+	//Somamos os valores do direito e esq
+	result[0] = resultDir[0] + resultEsq[0];
+	result[1] = resultDir[1] + resultEsq[1];
+	result[2] = resultDir[2] + resultEsq[2];
+	result[3] = resultDir[3] + resultEsq[3];
+
+	//Verificamos o proprio nó e somamos
+	if(no->memoria.estado == 0){
+		result[1]++; //LIVRE
+	}
+
+	if(no->memoria.estado == 1){
+		result[3] += pot(2,no->memoria.valor);
+		result[0]++; //OCUPADO
+	}
+
+	if(no->memoria.estado == 2){
+		result[2]++; //PARTICIONADO
+	}
+
+	return result;
+}
+
+void relatorioSistema(Arvore* arvore){
+	printf("[RELATORIO DE SISTEMA]\n");
+
+	int numOcupados, numLivres, numParticionados, memoriaOcupada, totalMemoria;
+
+	totalMemoria = pot(2, arvore->raiz->memoria.valor);
+
+	int* result = calculaRelatorioSistema(arvore->raiz);
+	numOcupados = result[0];
+	numLivres = result[1];
+	numParticionados = result[2];
+	memoriaOcupada = result[3];
+
+	printf("%d Ocupados\n", numOcupados);
+	printf("%d Livres\n", numLivres);
+	printf("%d Particionados\n", numParticionados);
+
+	float memoriaOcupadaFloat = (float)memoriaOcupada;
+	float totalMemoriaFloat = (float)totalMemoria;
+	float porcMemoria = (memoriaOcupadaFloat/totalMemoriaFloat);
+
+	printf("Memoria utilizada = %1.f / 100\n", porcMemoria * 100);
 }
 
 void inicializarNo(No* no, int valor){
