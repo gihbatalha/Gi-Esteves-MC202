@@ -54,6 +54,7 @@ void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
 int pot(int base, int expoente); //funcionando
 void imprimeArvore(No* no, char* espaco); //feito mas printa meio bizarro
+int imprimeProcessos(No* no);
 
 int main(){
   int potencia;
@@ -95,6 +96,13 @@ int main(){
 	  case 5:{
 
 	  } break;
+
+	  case 6:{
+	  	printf("[PROCESSOS PRESENTES NA MEMORIA]\n");
+	  	if(!imprimeProcessos(arvore.raiz)){	
+	  		printf("Nenhum processo presente\n");
+	  	}
+	  }break;
 	  default:{
         char* espaco = malloc(sizeof(char*));
 	  	espaco = strcat(espaco, "  ");
@@ -146,6 +154,31 @@ void imprimeArvore(No* no, char* espaco){
 
 		printf("%s \n", espaco);
 	}
+}
+
+int imprimeProcessos(No* no){
+	No* atual = no;
+	int dir, esq, printouNo;
+
+	if(no == NULL){
+		return 0;
+	}
+
+	esq = imprimeProcessos(no->esq);
+
+	if(no->memoria.estado == OCUPADO){
+		//printar o atual
+		printf("%d [Processo: %d]\n", pot(2, no->memoria.valor), no->memoria.processo->codigo);
+		printouNo = 1;
+	}
+
+	dir = imprimeProcessos(no->dir);
+
+	if(!esq && !dir && !printouNo){
+		return 0;
+	}
+
+	return 1;
 }
 
 //Função que retorna potência
