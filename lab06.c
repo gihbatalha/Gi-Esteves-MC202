@@ -57,7 +57,7 @@ void imprimirPosOrdem(No* no);
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
 int pot(int base, int expoente); //funcionando
-void imprimeArvore(No* no, char* espaco); //feito mas printa meio bizarro
+void imprimeArvore(No* no); //auxiliar para debug
 int imprimeProcessos(No* no);
 
 int main(){
@@ -106,56 +106,41 @@ int main(){
 	  	}
 	  }break;
 	  default:{
-        char* espaco = malloc(sizeof(char*));
-	  	espaco = strcat(espaco, "  ");
-	  	imprimeArvore(arvore.raiz, espaco);
+	  	imprimeArvore(arvore.raiz);
 	  }
     }
   }	
 }
 
-void imprimeArvore(No* no, char* espaco){
-	if(espaco == NULL){
-		printf("espaco nullllll\n");
-	}
-	espaco = strcat(espaco, "  ");
+void imprimeArvore(No* no){
 
-	printf("{\n");
-
-	if(no == NULL){
-		printf("}\n");
+	if(no == NULL)
 		return;
 
-	}else{
-		int potencia = pot(2, no->memoria.valor);
-		printf("%s valor %d\n",espaco, potencia);
 
-		int estado = no->memoria.estado;
-		char* estadoString = malloc(sizeof(char*));
-		if(estado == 0){
-			estadoString = "LIVRE";
-		}
-
-		if(estado == 1){
-			estadoString = "OCUPADO";
-		}
-
-		if(estado == 2){
-			estadoString = "PARTICIONADO";
-		}
-
-		printf("%s estado %s \n", espaco, estadoString);
-		printf("%s fragmentacao: %d\n", espaco, no->memoria.fragmentacao);
-		printf("%s processo: cod: %d size: %d\n", espaco, no->memoria.processo->codigo, no->memoria.processo->tamanho);
-
-		printf("%s esq:", espaco);
-		imprimeArvore(no->esq, espaco);
-
-		printf("%s dir:", espaco);
-		imprimeArvore(no->dir, espaco);
-
-		printf("%s \n", espaco);
+	int estado = no->memoria.estado;
+	char* estadoString = malloc(sizeof(char*));
+	if(estado == 0){
+		estadoString = "LIVRE";
 	}
+
+	if(estado == 1){
+		estadoString = "OCUPADO ()";
+	}
+
+	if(estado == 2){
+		estadoString = "PARTICIONADO";
+	}
+
+	int potencia = pot(2, no->memoria.valor);
+
+	printf("\n%d %s", potencia, estadoString);
+	printf("[");
+
+	imprimeArvore(no->esq);
+	imprimeArvore(no->dir);
+
+	printf("]");
 }
 
 int imprimeProcessos(No* no){
