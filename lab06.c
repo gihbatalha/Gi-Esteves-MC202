@@ -1,12 +1,56 @@
 /*
   Nome: Matheus Esteves Zanoto   RA: 184256
-  Nome: Giovanna Batalha         RA: 
+  Nome: Giovanna Batalha         RA: 197960
 
   Objetivos:
+  Utilizar uma árvore para gerenciar processos e a memória disponível em um S.O.
 
   Entradas:
+  - Inteiro que representa o expoente na base 2 da memória disponível no S.0
+  	Por exemplo, ao receber 10, sabemos que o S.O possui a memória 2 ^ 10.
+  - O número da operação desejada e os parêmetros da mesma
+    1.Inicia Processo - código do processo, tamanho do processo
+    2.Finaliza Processo - código do processo
+    3.Calcula Fragmentação 
+    4.Relatório do sistema
+    5.Imprime sementes geradoras
+    6.Imprime processos
 
   Saídas:
+  Depende das operações:
+  1.Processo (cod​) de tamanho size​ inicializado com sucesso Ou Memoria insuficiente
+  2.Processo (cod​) finalizado com sucesso ou Nao existe processo de codigo cod​ inicializado no sistema
+  3.Quantidade total de memoria desperdicada por fragmentacao: fragmentacaoCalculada
+  4.    [RELATORIO DE SISTEMA]
+		ocup​ ​Ocupados
+		livre​ ​Livres
+		part​ ​Particionados
+		Memoria utilizada = mem​ / 100
+  5. Exemplo:
+  	[SEMENTES GERADORAS]
+	Sim =​ ​(L:512)(P:1024)(O:496/512[862])
+	Pre = (P:1024)(L:512​ ​)(O:496/512[862])
+	Pos = (L:512)(O:496/512[862])(P:1024)
+
+	Um nó Livre​ é representado no formato (L:cap)​.
+	Um nó Particionado​ é representado no formato (P:cap)
+	Um nó Ocupado​ é representado no formato (O:p/cap[cod])
+	cap​ ​indica a capacidade de armazenamento do nó
+	p​ indica o tamanho de um processo alocado no nó Ocupado
+	cod​ indica o código do processo alocado no nó Ocupado
+  6.[PROCESSOS PRESENTES NA MEMORIA]
+	Mem_ocupada0​ ​[Processo: cod0​]
+	Mem_ocupada1​ [Processo: cod1​]
+	…
+	Mem_ocupadaN​ [Processo: codN​]
+
+	ou
+
+	[PROCESSOS PRESENTES NA MEMORIA]
+	Nenhum processo presente
+	
+	Obs.: Mem_ocupadaX se refere ao tamanho da partição que o
+	processo codX​ está utilizando.
 */
 
 #include <stdio.h>
@@ -24,7 +68,7 @@ typedef struct Processo{
 } Processo;
 
 typedef struct Memoria{
-  int valor; //Guarda a potencia exemplo 10 é como se fosse 2^10
+  int valor; //Guarda a potencia (exemplo: guarda 10, mas sabemos que é 2^10)
   Estado estado;
   int fragmentacao;
   Processo* processo;
@@ -45,19 +89,19 @@ void inicializarArvore(Arvore* arvore, int valor);
 
 
 int finalizarProcesso(No* no, int cod);
-int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
+int iniciarProcesso(No* no, Processo processo);
 
-int calcularFragmentacao(No* no);  ///funcionando
-void relatorioSistema(Arvore* arvore); //Gi fazendooo
-int* calculaRelatorioSistema(No* no); //Método auxiliar 
+int calcularFragmentacao(No* no); 
+void relatorioSistema(Arvore* arvore); 
+int* calculaRelatorioSistema(No* no); 
 void imprimirNo(No* no);
 void imprimirSimetrico(No* no);
 void imprimirPreOrdem(No* no);
 void imprimirPosOrdem(No* no);
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
-int pot(int base, int expoente); //funcionando
-void imprimeArvore(No* no); //auxiliar para debug
+int pot(int base, int expoente); 
+void imprimeArvore(No* no); 
 int imprimeProcessos(No* no);
 
 int main(){
@@ -73,7 +117,6 @@ int main(){
 	  case 1:{
 	  	Processo processo;
 	  	scanf("%d %d",&processo.codigo,&processo.tamanho);
-	  	//No* raiz = arvore.raiz;
 	    int iniciouProcesso = iniciarProcesso(&(*arvore.raiz),processo);
 	    if (iniciouProcesso == 0)
 	  	  printf("Memoria insuficiente\n");
@@ -112,8 +155,8 @@ int main(){
   }	
 }
 
+//Método auxiliar para ser possível visualizar a estrutura atual.
 void imprimeArvore(No* no){
-
 	if(no == NULL)
 		return;
 
@@ -143,6 +186,7 @@ void imprimeArvore(No* no){
 	printf("]");
 }
 
+//Imprime os processos, ou seja, ocorre somente se o nó está OCUPADO
 int imprimeProcessos(No* no){
 	int dir, esq, printouNo;
 
@@ -185,10 +229,12 @@ int pot(int base, int expoente){
 }
 
 //Função recursiva, recebe inicialmente a raíz da árvore
+//Enquanto o tamanho X do processo não segue a regra 2^i-1 < X <= 2^i, particionamos o nó
 int iniciarProcesso(No* no, Processo processo){
 	int metadeAtual = pot(2, no->memoria.valor-1);
 	int valorAtual = pot(2, no->memoria.valor);
 
+	//Adiciona o processo é maior que a metade do tamanho do nó e menor ou igual ao tamanho do nó
 	if(processo.tamanho > metadeAtual && processo.tamanho <= valorAtual){
 		//Chegou no nó que cabe o processo, mas está ocupado ou particionado, ou seja, não podemos incluir
 		if(no->memoria.estado == OCUPADO || no->memoria.estado == PARTICIONADO){
@@ -213,20 +259,24 @@ int iniciarProcesso(No* no, Processo processo){
 		return 0;
 	}
 
+	//Se não adicionou, particionamos o nó
 	if(no->esq == NULL && no->dir == NULL){
 		no->memoria.estado = PARTICIONADO;
 	}
 
+	//Criamos o nó da esquerda
 	if(no->esq == NULL){
 		no->esq = malloc(sizeof(No));
 		inicializarNo(&(*no->esq), no->memoria.valor-1);
 	}
 
+	//Criamos o nó da direita
 	if(no->dir == NULL){
 		no->dir = malloc(sizeof(No));
 		inicializarNo(&(*no->dir), no->memoria.valor-1);
 	}
 
+	//Tentamos adicionar, na partição da esquerda e depois na partição da direita
 	int esqLivre = iniciarProcesso(&(*no->esq), processo);
 	int dirLivre;
 
@@ -241,7 +291,9 @@ int iniciarProcesso(No* no, Processo processo){
 	return 1;
 }
 
+//Responsável por liberar o nó que possui o processo procurado, e remover as partições que não são mais necessárias
 int finalizarProcesso(No* no, int cod){
+  //Atualiza o nó que possui o processo para LIVRE
   if (no->memoria.estado == OCUPADO && no->memoria.processo->codigo == cod){
     free(no->memoria.processo);
     no->memoria.fragmentacao = 0;
@@ -252,6 +304,7 @@ int finalizarProcesso(No* no, int cod){
     int finalizouEsq = finalizarProcesso(&(*no->esq),cod);
     int finalizouDir = finalizarProcesso(&(*no->dir),cod);
 
+    //Se os nós da direita e da esquerda tem o estado LIVRE, devemos removê-los 
     if (no->esq->memoria.estado == LIVRE && no->dir->memoria.estado == LIVRE){
       free(no->esq);
       free(no->dir);
@@ -266,6 +319,7 @@ int finalizarProcesso(No* no, int cod){
   return 0;
 }
 
+//Percorre a árvore somando a fragmentação de cada nó que possui um processo, ou seja, dos nós com estado OCUPADO
 int calcularFragmentacao(No* raiz){
 	if(raiz == NULL){
 		return 0;
@@ -278,6 +332,13 @@ int calcularFragmentacao(No* raiz){
 	return result + fragEsq + fragDir;
 }
 
+//Percorre a árvore e retorna um array com a quantidade de nós com estado OCUPADO, LIVRE, PARTICIONADO e com o total
+// de memória ocupada da árvore, ou seja, com a soma dos tamanhos dos nós com espaço OCUPADO
+//O retorno é:
+//retorno[0] - número de nós ocupados
+//retorno[1] - número de nós livres
+//retorno[2] - número de nós particionados
+//retorno[3] - total de memória ocupada
 int* calculaRelatorioSistema(No* no){
 	int* result = malloc(4*sizeof(int)); //array com os valores numOcupados, numLivres, numParticionados, memoriaOcupada
 
@@ -316,6 +377,8 @@ int* calculaRelatorioSistema(No* no){
 	return result;
 }
 
+//De acordo com a função calculaRelatorioSistema, 
+//imprimimos na tela os valores calculados
 void relatorioSistema(Arvore* arvore){
 	printf("[RELATORIO DE SISTEMA]\n");
 
@@ -341,6 +404,7 @@ void relatorioSistema(Arvore* arvore){
 	printf("Memoria utilizada = %1.f / 100\n", truncado);
 }
 
+//Imprime informações do nó
 void imprimirNo(No* no){
   switch (no->memoria.estado){
     case LIVRE:{
@@ -359,6 +423,8 @@ void imprimirNo(No* no){
   }
 }
 
+//Imprime seguindo a ordem simétrica
+//Esq, o próprio nó e dir
 void imprimirSimetrico(No* no){
   if (no->esq != NULL)
     imprimirSimetrico(&(*no->esq));
@@ -367,6 +433,8 @@ void imprimirSimetrico(No* no){
     imprimirSimetrico(&(*no->dir));
 }
 
+//Imprime seguindo a pré-ordem
+//O próprio nó, esq e dir
 void imprimirPreOrdem(No* no){
   imprimirNo(&(*no));
   if (no->esq != NULL)
@@ -375,6 +443,8 @@ void imprimirPreOrdem(No* no){
     imprimirPreOrdem(&(*no->dir));
 }
 
+//Imprime seguindo a ordem pós-ordem
+//Esq, dir e o próprio nó
 void imprimirPosOrdem(No* no){
   if (no->esq != NULL)
     imprimirPosOrdem(&(*no->esq));
@@ -383,6 +453,7 @@ void imprimirPosOrdem(No* no){
   imprimirNo(&(*no));
 }
 
+//Imprime a árvore nas ordens simétrica, pré-ordem e pós-ordem
 void imprimirSementesGeradoras(Arvore* arvore){
   No* raiz = arvore->raiz;
   printf("[SEMENTES GERADORAS]\n");
@@ -397,6 +468,7 @@ void imprimirSementesGeradoras(Arvore* arvore){
   printf("\n");
 }
 
+//Funções de inicialização
 void inicializarNo(No* no, int valor){
   no->esq = NULL;
   no->dir = NULL;
