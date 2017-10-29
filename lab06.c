@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum Estado{
   LIVRE,OCUPADO,PARTICIONADO
@@ -41,17 +42,16 @@ typedef struct Arvore{
 void inicializarNo(No* no, int valor);
 void inicializarArvore(Arvore* arvore, int valor);
 
-int iniciarProcesso(No* no, Processo processo);
+
 int finalizarProcesso(No* no, int cod);
-int calcularFragmentacao(Arvore* arvore);
+int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
+int calcularFragmentacao(No* no);  ///começado
 void relatorioSistema(Arvore* arvore);
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
-int pot(int base, int expoente);
+int pot(int base, int expoente); //funcionando
+void imprimeArvore(No* no, char* espaco); //feito mas printa meio bizarro
 
-
-
-//teste eeeee gi
 int main(){
   int potencia;
   scanf("%d",&potencia);
@@ -82,7 +82,8 @@ int main(){
           printf("Processo (%d) finalizado com sucesso\n",cod);
 	  } break;
 	  case 3:{
-        
+	    int fragmentacao = calcularFragmentacao(arvore.raiz);
+	  	printf("Quantidade total de memoria desperdicada por fragmentacao: %d\n",fragmentacao);
 	  } break;
 	  case 4:{
 
@@ -91,10 +92,56 @@ int main(){
 
 	  } break;
 	  default:{
-        
+        char* espaco = malloc(sizeof(char*));
+	  	espaco = strcat(espaco, "  ");
+	  	imprimeArvore(arvore.raiz, espaco);
 	  }
     }
   }	
+}
+
+void imprimeArvore(No* no, char* espaco){
+	if(espaco == NULL){
+		printf("espaco nullllll\n");
+	}
+	espaco = strcat(espaco, "  ");
+
+	printf("{\n");
+
+	if(no == NULL){
+		printf("}\n");
+		return;
+
+	}else{
+		int potencia = pot(2, no->memoria.valor);
+		printf("%s valor %d\n",espaco, potencia);
+
+		int estado = no->memoria.estado;
+		char* estadoString = malloc(sizeof(char*));
+		if(estado == 0){
+			estadoString = "LIVRE";
+		}
+
+		if(estado == 1){
+			estadoString = "OCUPADO";
+		}
+
+		if(estado == 2){
+			estadoString = "PARTICIONADO";
+		}
+
+		printf("%s estado %s \n", espaco, estadoString);
+		printf("%s fragmentacao: %d\n", espaco, no->memoria.fragmentacao);
+		printf("%s processo: cod: %d size: %d\n", espaco, no->memoria.processo->codigo, no->memoria.processo->tamanho);
+
+		printf("%s esq:", espaco);
+		imprimeArvore(no->esq, espaco);
+
+		printf("%s dir:", espaco);
+		imprimeArvore(no->dir, espaco);
+
+		printf("%s \n", espaco);
+	}
 }
 
 //Função que retorna potência
@@ -119,8 +166,8 @@ int iniciarProcesso(No* no, Processo processo){
 	int valorAtual = pot(2, no->memoria.valor);
 
 	if(processo.tamanho > metadeAtual && processo.tamanho <= valorAtual){
-		//Chegou no nó que cabe o processo, mas está ocupado
-		if(no->memoria.estado == OCUPADO){
+		//Chegou no nó que cabe o processo, mas está ocupado ou particionado, ou seja, não podemos incluir
+		if(no->memoria.estado == OCUPADO || no->memoria.estado == PARTICIONADO){
 			return 0;
 		}
 
@@ -128,6 +175,7 @@ int iniciarProcesso(No* no, Processo processo){
 		if (no->memoria.estado == LIVRE){
 		  no->memoria.processo = malloc(sizeof(Processo));
 		  *(no->memoria.processo) = processo;
+		  no->memoria.fragmentacao = pot(2, no->memoria.valor) - processo.tamanho;
 		  no->memoria.estado = OCUPADO;
 		  return 1;
 		}
@@ -167,6 +215,7 @@ int iniciarProcesso(No* no, Processo processo){
 int finalizarProcesso(No* no, int cod){
   if (no->memoria.estado == OCUPADO && no->memoria.processo->codigo == cod){
     free(no->memoria.processo);
+    no->memoria.fragmentacao = 0;
     no->memoria.estado = LIVRE;
     return 1;
   }
@@ -184,6 +233,18 @@ int finalizarProcesso(No* no, int cod){
       return 1;
   }
   return 0;
+}
+
+int calcularFragmentacao(No* raiz){
+	if(raiz == NULL){
+		return 0;
+	}
+
+	int result = raiz->memoria.fragmentacao;
+	int fragDir = calcularFragmentacao(raiz->dir);
+	int fragEsq = calcularFragmentacao(raiz->esq);
+
+	return result + fragEsq + fragDir;
 }
 
 void inicializarNo(No* no, int valor){
