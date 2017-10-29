@@ -344,7 +344,7 @@ void imprimirNo(No* no){
       printf("(P:%d)",pot(2,no->memoria.valor));
     } break;
     default:{
-      printf("(O:%d/%d[%d]",
+      printf("(O:%d/%d[%d])",
         no->memoria.processo->tamanho,
         pot(2,no->memoria.valor),
         no->memoria.processo->codigo
