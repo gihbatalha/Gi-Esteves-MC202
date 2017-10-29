@@ -47,7 +47,6 @@ void inicializarArvore(Arvore* arvore, int valor);
 int finalizarProcesso(No* no, int cod);
 int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
 
-void finalizarProcesso(Arvore* arvore, int cod);
 int calcularFragmentacao(No* no);  ///funcionando
 void relatorioSistema(Arvore* arvore); //Gi fazendooo
 int* calculaRelatorioSistema(No* no); //Método auxiliar 
