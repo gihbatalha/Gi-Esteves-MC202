@@ -50,6 +50,10 @@ int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
 int calcularFragmentacao(No* no);  ///funcionando
 void relatorioSistema(Arvore* arvore); //Gi fazendooo
 int* calculaRelatorioSistema(No* no); //Método auxiliar 
+void imprimirNo(No* no);
+void imprimirSimetrico(No* no);
+void imprimirPreOrdem(No* no);
+void imprimirPosOrdem(No* no);
 void imprimirSementesGeradoras(Arvore* arvore);
 void imprimirProcessos(Arvore* arvore);
 int pot(int base, int expoente); //funcionando
@@ -90,13 +94,11 @@ int main(){
 	  	printf("Quantidade total de memoria desperdicada por fragmentacao: %d\n",fragmentacao);
 	  } break;
 	  case 4:{
-	  		relatorioSistema(&arvore);
-
+	    relatorioSistema(&arvore);
 	  } break;
 	  case 5:{
-
+        imprimirSementesGeradoras(&arvore);
 	  } break;
-
 	  case 6:{
 	  	printf("[PROCESSOS PRESENTES NA MEMORIA]\n");
 	  	if(!imprimeProcessos(arvore.raiz)){	
@@ -346,6 +348,62 @@ void relatorioSistema(Arvore* arvore){
 	float porcMemoria = (memoriaOcupadaFloat/totalMemoriaFloat);
 
 	printf("Memoria utilizada = %1.f / 100\n", porcMemoria * 100);
+}
+
+void imprimirNo(No* no){
+  switch (no->memoria.estado){
+    case LIVRE:{
+      printf("(L:%d)",pot(2,no->memoria.valor));
+    } break;
+    case PARTICIONADO:{
+      printf("(P:%d)",pot(2,no->memoria.valor));
+    } break;
+    default:{
+      printf("(O:%d/%d[%d]",
+        no->memoria.processo->tamanho,
+        pot(2,no->memoria.valor),
+        no->memoria.processo->codigo
+      );
+    }
+  }
+}
+
+void imprimirSimetrico(No* no){
+  if (no->esq != NULL)
+    imprimirSimetrico(&(*no->esq));
+  imprimirNo(&(*no));
+  if (no->dir != NULL)
+    imprimirSimetrico(&(*no->dir));
+}
+
+void imprimirPreOrdem(No* no){
+  imprimirNo(&(*no));
+  if (no->esq != NULL)
+    imprimirPreOrdem(&(*no->esq));
+  if (no->dir != NULL)
+    imprimirPreOrdem(&(*no->dir));
+}
+
+void imprimirPosOrdem(No* no){
+  if (no->esq != NULL)
+    imprimirPosOrdem(&(*no->esq));
+  if (no->dir != NULL)
+    imprimirPosOrdem(&(*no->dir));
+  imprimirNo(&(*no));
+}
+
+void imprimirSementesGeradoras(Arvore* arvore){
+  No* raiz = arvore->raiz;
+  printf("[SEMENTES GERADORAS]\n");
+  printf("Sim = ");
+  imprimirSimetrico(&(*raiz));
+  printf("\n");
+  printf("Pre = ");
+  imprimirPreOrdem(&(*raiz));
+  printf("\n");
+  printf("Pos = ");
+  imprimirPosOrdem(&(*raiz));
+  printf("\n");
 }
 
 void inicializarNo(No* no, int valor){
