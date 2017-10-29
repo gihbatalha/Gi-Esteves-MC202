@@ -263,6 +263,8 @@ int finalizarProcesso(No* no, int cod){
     if (no->esq->memoria.estado == LIVRE && no->dir->memoria.estado == LIVRE){
       free(no->esq);
       free(no->dir);
+      no->esq = NULL;
+      no->dir = NULL;
       no->memoria.estado = LIVRE;
       return 1;
     }
