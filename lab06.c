@@ -73,7 +73,7 @@ int main(){
 	  case 1:{
 	  	Processo processo;
 	  	scanf("%d %d",&processo.codigo,&processo.tamanho);
-	  	No* raiz = arvore.raiz;
+	  	//No* raiz = arvore.raiz;
 	    int iniciouProcesso = iniciarProcesso(&(*arvore.raiz),processo);
 	    if (iniciouProcesso == 0)
 	  	  printf("Memoria insuficiente\n");
@@ -144,7 +144,6 @@ void imprimeArvore(No* no){
 }
 
 int imprimeProcessos(No* no){
-	No* atual = no;
 	int dir, esq, printouNo;
 
 	if(no == NULL){
@@ -207,6 +206,11 @@ int iniciarProcesso(No* no, Processo processo){
 	else
 	  if (processo.tamanho > valorAtual)
 	    return 0;
+
+	//Só particiona se não estiver ocupado
+	if(no->memoria.estado == OCUPADO){
+		return 0;
+	}
 
 	if(no->esq == NULL && no->dir == NULL){
 		no->memoria.estado = PARTICIONADO;
