@@ -42,10 +42,11 @@ typedef struct Arvore{
 
 void inicializarNo(No* no, int valor);
 void inicializarArvore(Arvore* arvore, int valor);
-void percorrerNoParaExcluir(No* no, int cod);
-void excluirNoFolha(Arvore* arvore, int cod);
 
+
+int finalizarProcesso(No* no, int cod);
 int iniciarProcesso(No* no, Processo processo); //testado com o teste 1 do susy
+
 void finalizarProcesso(Arvore* arvore, int cod);
 int calcularFragmentacao(No* no);  ///funcionando
 void relatorioSistema(Arvore* arvore); //Gi fazendooo
@@ -55,9 +56,6 @@ void imprimirProcessos(Arvore* arvore);
 int pot(int base, int expoente); //funcionando
 void imprimeArvore(No* no, char* espaco); //feito mas printa meio bizarro
 
-
-
-//teste eeeee gi
 int main(){
   int potencia;
   scanf("%d",&potencia);
@@ -69,31 +67,27 @@ int main(){
   while(scanf("%d", &op) != EOF){
     switch(op){
 	  case 1:{
-	  	int cod, size;
-
-	  	scanf("%d", &cod);
-	  	scanf("%d", &size);
-
 	  	Processo processo;
-	  	processo.codigo = cod;
-	  	processo.tamanho = size;
-
-	  	int resp = iniciarProcesso(arvore.raiz, processo);
-
-	  	if(resp == 1){
-	  		printf("Processo (%d) de tamanho %d inicializado com sucesso\n", cod, size);
-	  	}else{
-	  		printf("Memoria insuficiente\n");
-	  	}
-
+	  	scanf("%d %d",&processo.codigo,&processo.tamanho);
+	  	No* raiz = arvore.raiz;
+	    int iniciouProcesso = iniciarProcesso(&(*arvore.raiz),processo);
+	    if (iniciouProcesso == 0)
+	  	  printf("Memoria insuficiente\n");
+	  	else
+	  	  printf("Processo (%d) de tamanho %d inicializado com sucesso\n",processo.codigo,processo.tamanho);
 	  } break;
 	  case 2:{
-
+        int cod;
+        scanf("%d",&cod);
+        int finalizouProcesso = finalizarProcesso(&(*arvore.raiz),cod);
+        if (finalizouProcesso == 0)
+          printf("Nao existe processo de codigo %d inicializado no sistema\n",cod);
+        else
+          printf("Processo (%d) finalizado com sucesso\n",cod);
 	  } break;
 	  case 3:{
-	  		int fragmentacao = calcularFragmentacao(arvore.raiz);
-	  		printf("Quantidade total de memoria desperdicada por fragmentacao: %d\n",fragmentacao);
-
+	    int fragmentacao = calcularFragmentacao(arvore.raiz);
+	  	printf("Quantidade total de memoria desperdicada por fragmentacao: %d\n",fragmentacao);
 	  } break;
 	  case 4:{
 	  		relatorioSistema(&arvore);
@@ -102,11 +96,11 @@ int main(){
 	  case 5:{
 
 	  } break;
-	  case 6:{
-	  	char* espaco = malloc(sizeof(char*));
+	  default:{
+        char* espaco = malloc(sizeof(char*));
 	  	espaco = strcat(espaco, "  ");
 	  	imprimeArvore(arvore.raiz, espaco);
-	  }break;
+	  }
     }
   }	
 }
@@ -183,32 +177,37 @@ int iniciarProcesso(No* no, Processo processo){
 		}
 
 		//Chegou no nó que cabe o processo e adicionou o processo
-		*(no->memoria.processo) = processo;
-
-		no->memoria.fragmentacao = pot(2, no->memoria.valor) - processo.tamanho;
-		no->memoria.estado = OCUPADO;
-		return 1;
+		if (no->memoria.estado == LIVRE){
+		  no->memoria.processo = malloc(sizeof(Processo));
+		  *(no->memoria.processo) = processo;
+		  no->memoria.fragmentacao = pot(2, no->memoria.valor) - processo.tamanho;
+		  no->memoria.estado = OCUPADO;
+		  return 1;
+		}
 	}
+	else
+	  if (processo.tamanho > valorAtual)
+	    return 0;
 
 	if(no->esq == NULL && no->dir == NULL){
 		no->memoria.estado = PARTICIONADO;
 	}
 
 	if(no->esq == NULL){
-		no->esq = (No*)malloc(sizeof(No));
-		inicializarNo(no->esq, no->memoria.valor-1);
+		no->esq = malloc(sizeof(No));
+		inicializarNo(&(*no->esq), no->memoria.valor-1);
 	}
 
 	if(no->dir == NULL){
-		no->dir = (No*)malloc(sizeof(No));
-		inicializarNo(no->dir, no->memoria.valor-1);
+		no->dir = malloc(sizeof(No));
+		inicializarNo(&(*no->dir), no->memoria.valor-1);
 	}
 
-	int esqLivre = iniciarProcesso(no->esq, processo);
+	int esqLivre = iniciarProcesso(&(*no->esq), processo);
 	int dirLivre;
 
 	if(esqLivre == 0){
-		dirLivre = iniciarProcesso(no->dir, processo);
+		dirLivre = iniciarProcesso(&(*no->dir), processo);
 
 		if(dirLivre==0){
 			return 0;
@@ -216,6 +215,29 @@ int iniciarProcesso(No* no, Processo processo){
 	}
 
 	return 1;
+}
+
+int finalizarProcesso(No* no, int cod){
+  if (no->memoria.estado == OCUPADO && no->memoria.processo->codigo == cod){
+    free(no->memoria.processo);
+    no->memoria.fragmentacao = 0;
+    no->memoria.estado = LIVRE;
+    return 1;
+  }
+  if (no->memoria.estado == PARTICIONADO){
+    int finalizouEsq = finalizarProcesso(&(*no->esq),cod);
+    int finalizouDir = finalizarProcesso(&(*no->dir),cod);
+
+    if (no->esq->memoria.estado == LIVRE && no->dir->memoria.estado == LIVRE){
+      free(no->esq);
+      free(no->dir);
+      no->memoria.estado = LIVRE;
+      return 1;
+    }
+    if (finalizouEsq == 1 || finalizouDir == 1)
+      return 1;
+  }
+  return 0;
 }
 
 int calcularFragmentacao(No* raiz){
@@ -293,32 +315,15 @@ void relatorioSistema(Arvore* arvore){
 }
 
 void inicializarNo(No* no, int valor){
-	//printf("inicializarNo...\n");
   no->esq = NULL;
   no->dir = NULL;
   no->memoria.valor = valor;
   no->memoria.estado = LIVRE;
   no->memoria.fragmentacao = 0;
-  no->memoria.processo = malloc(sizeof(Processo));
+  no->memoria.processo = NULL;
 } 
 
 void inicializarArvore(Arvore* arvore, int valor){
   arvore->raiz = (No*)malloc(sizeof(No));
   inicializarNo(&(*arvore->raiz),valor);
-}
-
-void percorrerNoParaExcluir(No* no, int cod){
-  if (no->esq == NULL && no->dir == NULL && no->memoria.processo->codigo == cod)
-    free(no);
-  else{
-    if (no->esq != NULL)
-      percorrerNoParaExcluir(&(*no->esq),cod);
-    if (no->dir != NULL)
-      percorrerNoParaExcluir(&(*no->dir),cod);
-  }
-}
-
-void excluirNoFolha(Arvore* arvore, int cod){
-  No* raiz = arvore->raiz;
-  percorrerNoParaExcluir(&(*arvore->raiz),cod);
 }
