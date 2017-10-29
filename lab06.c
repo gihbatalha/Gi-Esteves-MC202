@@ -336,8 +336,9 @@ void relatorioSistema(Arvore* arvore){
 	float memoriaOcupadaFloat = (float)memoriaOcupada;
 	float totalMemoriaFloat = (float)totalMemoria;
 	float porcMemoria = (memoriaOcupadaFloat/totalMemoriaFloat);
+	float truncado = truncf(porcMemoria*100);
 
-	printf("Memoria utilizada = %1.f / 100\n", porcMemoria * 100);
+	printf("Memoria utilizada = %1.f / 100\n", truncado);
 }
 
 void imprimirNo(No* no){
