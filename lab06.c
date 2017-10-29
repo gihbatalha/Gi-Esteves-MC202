@@ -101,7 +101,7 @@ int main(){
 	  } break;
 	  case 6:{
 	  	printf("[PROCESSOS PRESENTES NA MEMORIA]\n");
-	  	if(!imprimeProcessos(arvore.raiz)){	
+	  	if(imprimeProcessos(arvore.raiz) == 0){	
 	  		printf("Nenhum processo presente\n");
 	  	}
 	  }break;
@@ -146,6 +146,7 @@ void imprimeArvore(No* no){
 int imprimeProcessos(No* no){
 	int dir, esq, printouNo;
 
+    printouNo = 0;
 	if(no == NULL){
 		return 0;
 	}
@@ -160,7 +161,7 @@ int imprimeProcessos(No* no){
 
 	dir = imprimeProcessos(no->dir);
 
-	if(!esq && !dir && !printouNo){
+	if(esq == 0 && dir == 0 && printouNo == 0){
 		return 0;
 	}
 
