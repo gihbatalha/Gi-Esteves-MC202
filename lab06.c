@@ -104,6 +104,8 @@ int pot(int base, int expoente);
 void imprimeArvore(No* no); 
 int imprimeProcessos(No* no);
 
+void liberarArvore(No* no);
+
 int main(){
   int potencia;
   scanf("%d",&potencia);
@@ -152,7 +154,17 @@ int main(){
 	  	imprimeArvore(arvore.raiz);
 	  }
     }
-  }	
+  }
+  liberarArvore(&(*arvore.raiz));
+}
+
+// Método que libera todos os nós da árvore de forma recursiva pré ordem.
+void liberarArvore(No* no){
+  if (no->esq != NULL)
+    liberarArvore(&(*no->esq));
+  if (no->dir != NULL)
+    liberarArvore(&(*no->dir));
+  free(no);
 }
 
 //Método auxiliar para ser possível visualizar a estrutura atual.
