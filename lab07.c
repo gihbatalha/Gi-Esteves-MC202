@@ -29,8 +29,8 @@ void adiciona(No* no);
 void retiraNo(No* arvore);
 
 //Métodos de gerenciamento dos programas
-void instalaProgramaNaArvore(Arvore* arvore, char* programa);
-void instalaPrograma(No* no, char* programa);
+Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa);
+Pasta* instalaPrograma(No* no, char* programa);
 void desinstalaPrograma(Arvore* arvore, char* programa);
 void testaVelocidade(Arvore* arvore, char* programa, int tempo);
 void otimizarCapacidadeDeResposta(Arvore* arvore);
@@ -54,7 +54,7 @@ void inicializaArvore(Arvore* arvore, int numProgramas){
 	arvore->sementePreOrder = malloc(numProgramas*sizeof(char*));
 }
 
-void instalaProgramaNaArvore(Arvore* arvore, char* programa){
+Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa){
   if(arvore->raiz == NULL){
     arvore->raiz = malloc(sizeof(No));
 	inicializaNo(arvore->raiz);
@@ -62,43 +62,41 @@ void instalaProgramaNaArvore(Arvore* arvore, char* programa){
 	strcat(arvore->raiz->pasta.nome,"raiz");
 	strcat(arvore->raiz->pasta.programa,programa);
 
-	printf("Pasta criada: %s. Nome do programa: %s\n", arvore->raiz->pasta.nome, arvore->raiz->pasta.programa);
+	return &(arvore->raiz->pasta);
   }
-  else
-    instalaPrograma(arvore->raiz,programa);
+
+  return instalaPrograma(arvore->raiz,programa);
 }
 
-void instalaPrograma(No* no, char* programa){
+Pasta* instalaPrograma(No* no, char* programa){
 
 	if(strcmp(programa, no->pasta.programa) < 0){
-		if(no->esq == NULL){
-			no->esq = malloc(sizeof(No));
-			inicializaNo(no->esq);
-			no->esq->pai = no;
+	  if(no->esq == NULL){
+	    no->esq = malloc(sizeof(No));
+		inicializaNo(no->esq);
+		no->esq->pai = no;
 
-            strcat(no->esq->pasta.programa,programa);
-			strcat(no->esq->pasta.nome, no->pasta.programa);
-			strcat(no->esq->pasta.nome, "_esq");
+        strcat(no->esq->pasta.programa,programa);
+		strcat(no->esq->pasta.nome, no->pasta.programa);
+		strcat(no->esq->pasta.nome, "_esq");
 
-			printf("Pasta criada: %s. Nome do programa: %s\n", no->esq->pasta.nome, no->esq->pasta.programa);
-		}
-		else
-		  instalaPrograma(no->esq, programa);
-	}else{
-		if(no->dir == NULL){
-			no->dir = malloc(sizeof(No));
-			inicializaNo(no->dir);
-			no->dir->pai = no;
-
-            strcat(no->dir->pasta.programa,programa);
-			strcat(no->dir->pasta.nome, no->pasta.programa);
-			strcat(no->dir->pasta.nome, "_dir");
-
-			printf("Pasta criada: %s. Nome do programa: %s\n", no->dir->pasta.nome, no->dir->pasta.programa);
-		}
-		else
-		  instalaPrograma(no->dir, programa);
+		return &(no->esq->pasta);
+	  }	
+	  return instalaPrograma(no->esq, programa);
 	}
+
+    if(no->dir == NULL){
+	  no->dir = malloc(sizeof(No));
+	  inicializaNo(no->dir);
+	  no->dir->pai = no;
+
+      strcat(no->dir->pasta.programa,programa);
+      strcat(no->dir->pasta.nome, no->pasta.programa);
+	  strcat(no->dir->pasta.nome, "_dir");
+
+	  return &(no->dir->pasta);
+	}
+	return instalaPrograma(no->dir, programa);
 }
 
 int main(){
@@ -118,13 +116,12 @@ int main(){
 	while(scanf("%d", &op) != EOF){
 		switch(op){
 
-			case 1: ;
-					char* programa = malloc(30*sizeof(char));
-					scanf("%s", programa);					
-					printf("Lido: %s\n",programa);
-
-					instalaProgramaNaArvore(&arvore, programa);
-					break;
+			case 1:{
+			  char* programa = malloc(30*sizeof(char));
+			  scanf("%s", programa);					
+			  Pasta* pasta = instalaProgramaNaArvore(&arvore, programa);
+			  printf("[INSTALL] Programa %s.exe instalado com sucesso na pasta %s\n",pasta->programa,pasta->nome);
+			}break;
 			case 2:	
 					break;
 			case 3:
