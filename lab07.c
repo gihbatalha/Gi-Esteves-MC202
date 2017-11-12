@@ -29,7 +29,7 @@ No* buscar(No* no, char* programa);
 No* buscarDescendente(No* no);
 Pasta* remover(Arvore* arvore, char* programa);
 void removerEntreNos(Arvore* arvore, No* filho, No* no, No* pai);
-void removerFolha(No* folha);
+void removerFolha(Arvore* arvore, No* folha);
 
 //Métodos de gerenciamento dos programas
 Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa);
@@ -141,14 +141,20 @@ void removerEntreNos(Arvore* arvore,No* filho, No* no, No* pai){
   free(no);
 }
 
-void removerFolha(No* folha){
+void removerFolha(Arvore* arvore, No* folha){
   No* pai = folha->pai;
-  if (pai != NULL && pai->esq == folha)
-  	pai->esq = NULL;
-  else
-  	if (pai != NULL && pai->dir == folha)
-  	  pai->dir = NULL;
-  free(folha);
+  if (pai == NULL){
+    free(arvore->raiz);
+    arvore->raiz = NULL;
+  }
+  else{
+	  if (pai->esq == folha)
+	  	pai->esq = NULL;
+	  else
+	  	if (pai->dir == folha)
+	  	  pai->dir = NULL;
+	  free(folha);
+  }
 }
 
 Pasta* remover(Arvore* arvore, char* programa){
@@ -159,17 +165,15 @@ Pasta* remover(Arvore* arvore, char* programa){
   if (noParaExcluir == NULL)
     return NULL;
 
-  Pasta* pasta = malloc(sizeof(Pasta));
-  *pasta = noParaExcluir->pasta;
+  Pasta pasta;
+  pasta.programa = malloc(30*sizeof(char));
+  pasta.nome = malloc(30*sizeof(char));
+  strcpy(pasta.programa,noParaExcluir->pasta.programa);
+  strcpy(pasta.nome,noParaExcluir->pasta.nome);
+  Pasta* ponteiroPasta = &pasta;
 
-  if (noParaExcluir->esq == NULL && noParaExcluir->dir == NULL){
-  	if (noParaExcluir->pai == NULL){
-      free(arvore->raiz);
-      arvore->raiz = NULL;
-  	}
-  	else
-      removerFolha(noParaExcluir);
-  }
+  if (noParaExcluir->esq == NULL && noParaExcluir->dir == NULL)
+    removerFolha(arvore, noParaExcluir);
   else
     if (noParaExcluir->dir == NULL)
       removerEntreNos(arvore,noParaExcluir->esq,noParaExcluir,noParaExcluir->pai);
@@ -187,13 +191,21 @@ Pasta* remover(Arvore* arvore, char* programa){
         if (descendente->esq != NULL)
           removerEntreNos(arvore,descendente->esq,descendente,descendente->pai);
         else
-          if (descendente->dir != NULL)
-            removerEntreNos(arvore,descendente->dir,descendente,descendente->pai);
-          else
-            removerFolha(descendente);
+          removerFolha(arvore,descendente);
+
+        No* novoEsq = noParaExcluir->esq;
+        No* novoDir = noParaExcluir->dir;
+        if (novoEsq != NULL){
+          strcpy(novoEsq->pasta.nome,noParaExcluir->pasta.programa);
+          strcat(novoEsq->pasta.nome,"_esq");
+        }
+        if (novoDir != NULL){
+          strcpy(novoDir->pasta.nome,noParaExcluir->pasta.programa);
+          strcat(novoDir->pasta.nome,"_dir");
+        }
       }
 
-  return pasta;
+  return ponteiroPasta;
 }
 
 void imprimeCaminhoPrograma(No* no, char* programa){
