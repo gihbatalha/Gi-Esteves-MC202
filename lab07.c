@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 typedef struct Pasta{
 	char* nome;
 	char* programa;
@@ -36,7 +35,7 @@ void liberarArvore(No* no);
 //Métodos de gerenciamento dos programas
 Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa);
 Pasta* instalaPrograma(No* no, char* programa);
-void testaVelocidade(Arvore* arvore, char* programa, int tempo);
+int getVelocidade(No* no, char* programa);
 void otimizarCapacidadeDeResposta(Arvore* arvore);
 void criaSementesInOrder(Arvore* arvore);
 void restaura(Arvore* arvore);
@@ -306,6 +305,15 @@ No* balancear(char** sementesInOrdem, int inicio, int fim){
   return raiz;
 }
 
+int getVelocidade(No* no, char* programa){
+  char* programaComparado = no->pasta.programa;
+  if (strcmp(programa,programaComparado) == 0)
+    return 0;
+  if (strcmp(programa,programaComparado) < 0)
+    return 1 + getVelocidade(no->esq,programa);
+  return 1 + getVelocidade(no->dir,programa);
+}
+
 int main(){
 	int p, op; //número de programas
 
@@ -339,7 +347,14 @@ int main(){
                 printf("[UNINSTALL] Programa %s.exe desinstalado com sucesso\n",pasta->programa);
 			} break;
 			case 3:{
-
+              char* programa = malloc(30*sizeof(char));
+              int tempo;
+              scanf("%s %d",programa,&tempo);
+              int tempoAcesso = getVelocidade(arvore.raiz,programa);
+              if (tempoAcesso > tempo)
+                printf("[DELAY][FAIL] O acesso ao programa %s.exe ultrapassou o limite de %d segundo\n",programa,tempo);
+              else
+                printf("[DELAY][OK] O acesso ao programa %s.exe foi concluido em %d segundos\n",programa,tempoAcesso);
 			} break;
 			case 4:{
               balancearArvore(&arvore);
