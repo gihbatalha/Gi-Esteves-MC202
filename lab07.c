@@ -20,6 +20,7 @@ typedef struct arvoreBinaria{
 	No* raiz;
 	char** sementeInOrder; //vetor de strings
 	char** sementePreOrder;
+	int tamanho;
 }Arvore;
 
 //Métodos específicos da árvore e do nó
@@ -30,6 +31,7 @@ No* buscarDescendente(No* no);
 Pasta* remover(Arvore* arvore, char* programa);
 void removerEntreNos(Arvore* arvore, No* filho, No* no, No* pai);
 void removerFolha(Arvore* arvore, No* folha);
+void liberarArvore(No* no);
 
 //Métodos de gerenciamento dos programas
 Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa);
@@ -41,6 +43,18 @@ void restaura(Arvore* arvore);
 void imprimeCaminhoPrograma(No* no, char* programa);
 void imprimeProgramasDaArvore(Arvore* arvore);
 void imprimeProgramas(No* no, No* raiz);
+void criaSementesInOrdem(No* no, char** sementesInOrdem, int* tamanho);
+void balancearArvore(Arvore* arvore);
+No* balancear(char** sementesInOrdem, int inicio, int fim);
+
+// Método que libera todos os nós da árvore de forma recursiva pré ordem.
+void liberarArvore(No* no){
+  if (no->esq != NULL)
+    liberarArvore(no->esq);
+  if (no->dir != NULL)
+    liberarArvore(no->dir);
+  free(no);
+}
 
 void inicializaNo(No* no){
 	no->dir = NULL;
@@ -53,7 +67,7 @@ void inicializaNo(No* no){
 
 void inicializaArvore(Arvore* arvore, int numProgramas){
 	arvore->raiz = NULL;
-
+    arvore->tamanho = 0;
 	arvore->sementeInOrder = malloc(numProgramas*sizeof(char*));
 	arvore->sementePreOrder = malloc(numProgramas*sizeof(char*));
 }
@@ -75,12 +89,14 @@ Pasta* instalaProgramaNaArvore(Arvore* arvore, char* programa){
     arvore->raiz = malloc(sizeof(No));
 	inicializaNo(arvore->raiz);
 
-	strcat(arvore->raiz->pasta.nome,"raiz");
+	strcpy(arvore->raiz->pasta.nome,"raiz");
 	strcat(arvore->raiz->pasta.programa,programa);
 
+    arvore->tamanho++;
 	return &(arvore->raiz->pasta);
   }
 
+  arvore->tamanho++;
   return instalaPrograma(arvore->raiz,programa);
 }
 
@@ -92,8 +108,8 @@ Pasta* instalaPrograma(No* no, char* programa){
 		inicializaNo(no->esq);
 		no->esq->pai = no;
 
-        strcat(no->esq->pasta.programa,programa);
-		strcat(no->esq->pasta.nome, no->pasta.programa);
+        strcpy(no->esq->pasta.programa,programa);
+		strcpy(no->esq->pasta.nome, no->pasta.programa);
 		strcat(no->esq->pasta.nome, "_esq");
 
 		return &(no->esq->pasta);
@@ -106,8 +122,8 @@ Pasta* instalaPrograma(No* no, char* programa){
 	  inicializaNo(no->dir);
 	  no->dir->pai = no;
 
-      strcat(no->dir->pasta.programa,programa);
-      strcat(no->dir->pasta.nome, no->pasta.programa);
+      strcpy(no->dir->pasta.programa,programa);
+      strcpy(no->dir->pasta.nome, no->pasta.programa);
 	  strcat(no->dir->pasta.nome, "_dir");
 
 	  return &(no->dir->pasta);
@@ -184,7 +200,7 @@ Pasta* remover(Arvore* arvore, char* programa){
         char* aux = malloc(30*sizeof(char));
         No* descendente = buscarDescendente(noParaExcluir->esq);
 
-        strcat(aux,descendente->pasta.programa);
+        strcpy(aux,descendente->pasta.programa);
         strcpy(descendente->pasta.programa, noParaExcluir->pasta.programa);
         strcpy(noParaExcluir->pasta.programa, aux);
 
@@ -205,6 +221,7 @@ Pasta* remover(Arvore* arvore, char* programa){
         }
       }
 
+  arvore->tamanho--;
   return ponteiroPasta;
 }
 
@@ -239,6 +256,54 @@ void imprimeProgramasDaArvore(Arvore* arvore){
   printf("[PATHS]\n");
   if (arvore->raiz != NULL)
     imprimeProgramas(arvore->raiz,arvore->raiz);
+}
+
+void criaSementesInOrdem(No* no, char** sementesInOrdem, int* tamanho){
+    if (no->esq != NULL)
+     criaSementesInOrdem(no->esq,sementesInOrdem,tamanho);
+
+    sementesInOrdem[*tamanho] = malloc(30*sizeof(char));
+ 	strcpy(sementesInOrdem[*tamanho],no->pasta.programa);
+ 	(*tamanho)++;
+
+ 	if (no->dir != NULL)
+ 	  criaSementesInOrdem(no->dir,sementesInOrdem,tamanho);
+}
+
+void balancearArvore(Arvore* arvore){
+  if (arvore->raiz != NULL){
+	  char** sementesInOrdem = malloc(arvore->tamanho * sizeof(char*));
+	  int tamanho = 0;
+	  criaSementesInOrdem(arvore->raiz,sementesInOrdem,&tamanho);
+      liberarArvore(arvore->raiz);
+      arvore->raiz = balancear(sementesInOrdem,0,arvore->tamanho-1);
+      strcpy(arvore->raiz->pasta.nome,"raiz");
+  }
+}
+
+No* balancear(char** sementesInOrdem, int inicio, int fim){
+  int mediana = (inicio + fim)/2;
+  No* raiz =  malloc(sizeof(No));
+  inicializaNo(raiz);
+  strcpy(raiz->pasta.programa,sementesInOrdem[mediana]);
+
+  if (mediana > inicio){
+    No* esq = balancear(sementesInOrdem,inicio,mediana-1);
+    esq->pai = raiz;
+	strcpy(esq->pasta.nome, raiz->pasta.programa);
+	strcat(esq->pasta.nome, "_esq");
+	raiz->esq = esq;
+  }
+
+  if (mediana < fim){
+    No* dir = balancear(sementesInOrdem,mediana+1,fim);
+    dir->pai = raiz;
+    strcpy(dir->pasta.nome, raiz->pasta.programa);
+	strcat(dir->pasta.nome, "_dir");
+	raiz->dir = dir;
+  }
+
+  return raiz;
 }
 
 int main(){
@@ -277,7 +342,8 @@ int main(){
 
 			} break;
 			case 4:{
-
+              balancearArvore(&arvore);
+              printf("[OPTIMIZE] O sistema de acesso a programas foi otimizado\n");
 			} break;
 			case 5:{
 
