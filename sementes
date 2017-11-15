@@ -1,0 +1,48 @@
+//Imprime seguindo a ordem simétrica
+//Esq, o próprio nó e dir
+void imprimirSimetrico(No* no){
+  if (no->esq != NULL)
+    imprimirSimetrico(&(*no->esq));
+  imprimirNo(&(*no));
+  if (no->dir != NULL)
+    imprimirSimetrico(&(*no->dir));
+}
+
+//Imprime seguindo a pré-ordem
+//O próprio nó, esq e dir
+void imprimirPreOrdem(No* no){
+  imprimirNo(&(*no));
+  if (no->esq != NULL)
+    imprimirPreOrdem(&(*no->esq));
+  if (no->dir != NULL)
+    imprimirPreOrdem(&(*no->dir));
+}
+
+//Imprime seguindo a ordem pós-ordem
+//Esq, dir e o próprio nó
+void imprimirPosOrdem(No* no){
+  if (no->esq != NULL)
+    imprimirPosOrdem(&(*no->esq));
+  if (no->dir != NULL)
+    imprimirPosOrdem(&(*no->dir));
+  imprimirNo(&(*no));
+}
+
+1
+1 Hugo
+1 Eliete
+1 Giovanna
+1 Bruno
+1 Fabiana
+1 Murilo
+1 Julia
+1 Isabelli
+1 Otavio
+5
+6
+7
+
+
+9
+b e f g h i j m o
+h e b g f m j i o
